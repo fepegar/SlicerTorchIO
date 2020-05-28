@@ -91,6 +91,7 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
   def addTransforms(self):
     transformNames = [
       'RandomAffine',
+      'RandomMotion',
       'RandomElasticDeformation',
     ]
     self.transformsComboBox.addItems(transformNames)
@@ -126,7 +127,7 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     outputVolumeNode = self.outputSelector.currentNode()
 
     if outputVolumeNode is None:
-      name = f'{inputVolumeNode.GetName()} transformed'
+      name = f'{inputVolumeNode.GetName()} {self.currentTransform.name}'
       outputVolumeNode = slicer.mrmlScene.AddNewNodeByClass(
         'vtkMRMLScalarVolumeNode',
         name,
