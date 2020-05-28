@@ -1,9 +1,10 @@
 import ctk
 
 class CoordinatesWidget:
-    def __init__(self, decimals=0, coordinates=(0, 0, 0)):
+    def __init__(self, decimals=0, coordinates=(0, 0, 0), step=1):
         self.widget = ctk.ctkCoordinatesWidget()
         self.widget.decimals = decimals
+        self.widget.singleStep = step
         self.decimals = decimals
         self.setCoordinates(coordinates)
 

@@ -15,6 +15,7 @@ class RandomElasticDeformation(Transform):
         self.maxDisplacementWidget = CoordinatesWidget(
             decimals=2,
             coordinates=self.getDefaultValue('max_displacement'),
+            step=0.1,
         )
         self.layout.addRow('Maximum displacement: ', self.maxDisplacementWidget.widget)
 
