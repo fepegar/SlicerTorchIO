@@ -13,8 +13,12 @@ from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModuleTest,
 )
 
-# slicer.util.pip_install('torchio')
-import torchio
+
+try:
+  import torchio
+except ImportError:
+  slicer.util.pip_install('torchio')
+  import torchio
 
 
 class TorchIO(ScriptedLoadableModule):
@@ -47,6 +51,9 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     self.makeGUI()
     self.onInputNodeModified()
     slicer.torchio = self
+    import SampleData
+    SampleData.downloadSample('MRHead')
+
 
   def makeGUI(self):
     self.addNodesButton()
@@ -92,6 +99,7 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     transformNames = [
       'RandomAffine',
       'RandomMotion',
+      'RandomGhosting',
       'RandomElasticDeformation',
     ]
     self.transformsComboBox.addItems(transformNames)
@@ -136,7 +144,11 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     try:
       outputImage = self.currentTransform(inputVolumeNode)
     except Exception as e:
-      slicer.util.errorDisplay(e)
+      message = (
+        f'TorchIO returned the error: {e}'
+        f'\n\nTransform kwargs:\n{self.currentTransform.getKwargs()}'
+      )
+      slicer.util.errorDisplay(message)
       return
     su.PushVolumeToSlicer(outputImage, targetNode=outputVolumeNode)
     slicer.util.setSliceViewerLayers(background=outputVolumeNode)

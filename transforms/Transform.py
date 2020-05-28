@@ -77,6 +77,14 @@ class Transform:
         slider.setToolTip(self.getArgDocstring(name))
         return slider
 
+    def makeAxesLayout(self):
+        layout = qt.QHBoxLayout()
+        axesDict = {n: qt.QCheckBox(str(n)) for n in range(3)}
+        for widget in axesDict.values():
+            widget.setChecked(True)
+            layout.addWidget(widget)
+        return layout, axesDict
+
     def getSignature(self):
         klass = self.getTransformClass()
         return inspect.signature(klass)

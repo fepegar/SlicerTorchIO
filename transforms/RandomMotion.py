@@ -3,11 +3,6 @@ import qt
 from .Transform import Transform
 from .CoordinatesWidget import CoordinatesWidget
 
-            # degrees: float = 10,
-            # translation: float = 10,  # in mm
-            # num_transforms: int = 2,
-            # image_interpolation: str = 'linear',
-
 
 class RandomMotion(Transform):
     def setup(self):
