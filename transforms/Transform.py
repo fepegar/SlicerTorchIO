@@ -17,12 +17,21 @@ class Transform:
         self.layout = qt.QFormLayout(self.groupBox)
         self.setup()
 
+    def getHelpLink(self):
+        docs = 'https://torchio.readthedocs.io'
+        type_ = self.transformType
+        return f'{docs}/transforms/{self.transformType}.html#torchio.transforms.{self.name}'
+
     def setup(self):
         raise NotImplementedError
 
     @property
     def name(self):
         return self.__class__.__name__
+
+    @property
+    def transformType(self):
+        return 'augmentation' if self.name.startswith('Random') else 'preprocessing'
 
     def show(self):
         self.groupBox.show()
