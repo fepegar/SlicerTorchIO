@@ -1,4 +1,5 @@
 import importlib
+import traceback
 from pathlib import Path
 
 import numpy as np
@@ -14,10 +15,17 @@ from slicer.ScriptedLoadableModule import (
 )
 
 
+installLocal = True
+
+
 try:
   import torchio
 except ImportError:
-  slicer.util.pip_install('torchio')
+  if installLocal:
+    repoDir = Path('~/git/torchio').expanduser()
+    slicer.util.pip_install(f'--editable {repoDir}')
+  else:
+    slicer.util.pip_install('torchio')
   import torchio
 
 
@@ -49,17 +57,17 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     self.transforms = []
     self.currentTransform = None
     self.makeGUI()
-    self.onInputNodeModified()
+    self.onVolumeSelectorModified()
     slicer.torchio = self
     import SampleData
     SampleData.downloadSample('MRHead')
-
+    self.backgroundNode = None
 
   def makeGUI(self):
     self.addNodesButton()
     self.addTransformButton()
     self.addTransforms()
-    self.addApplyButton()
+    self.addToggleApplyButtons()
     # Add vertical spacer
     self.layout.addStretch(1)
 
@@ -75,15 +83,17 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     self.inputSelector.removeEnabled = True
     self.inputSelector.noneEnabled = False
     self.inputSelector.setMRMLScene(slicer.mrmlScene)
-    self.inputSelector.currentNodeChanged.connect(self.onInputNodeModified)
+    self.inputSelector.currentNodeChanged.connect(self.onVolumeSelectorModified)
     nodesLayout.addRow('Input volume: ', self.inputSelector)
 
     self.outputSelector = slicer.qMRMLNodeComboBox()
     self.outputSelector.nodeTypes = ['vtkMRMLScalarVolumeNode']
+    self.outputSelector.addEnabled = False
     self.outputSelector.removeEnabled = True
     self.outputSelector.noneEnabled = True
     self.outputSelector.setMRMLScene(slicer.mrmlScene)
     self.outputSelector.noneDisplay = 'Create new volume'
+    self.outputSelector.currentNodeChanged.connect(self.onVolumeSelectorModified)
     nodesLayout.addRow('Output volume: ', self.outputSelector)
 
   def addTransformButton(self):
@@ -97,10 +107,13 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
 
   def addTransforms(self):
     transformNames = [
+      'RandomSpike',
       'RandomAffine',
       'RandomMotion',
       'RandomGhosting',
+      'RandomBiasField',
       'RandomElasticDeformation',
+      'HistogramStandardization',
     ]
     self.transformsComboBox.addItems(transformNames)
     for transformName in transformNames:
@@ -112,11 +125,21 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     self.transformsComboBox.currentIndex = -1
     self.transformsComboBox.currentIndexChanged.connect(self.onTransformsComboBox)
 
-  def addApplyButton(self):
-    self.applyButton = qt.QPushButton('Apply')
+  def addToggleApplyButtons(self):
+    toggleApplyFrame = qt.QFrame()
+    toggleApplyLayout = qt.QHBoxLayout(toggleApplyFrame)
+
+    self.toggleButton = qt.QPushButton('Toggle volumes')
+    self.toggleButton.clicked.connect(self.onToggleButton)
+    self.toggleButton.setDisabled(True)
+    toggleApplyLayout.addWidget(self.toggleButton)
+
+    self.applyButton = qt.QPushButton('Apply transform')
     self.applyButton.clicked.connect(self.onApplyButton)
     self.applyButton.setDisabled(True)
-    self.layout.addWidget(self.applyButton)
+    toggleApplyLayout.addWidget(self.applyButton)
+
+    self.layout.addWidget(toggleApplyFrame)
 
   def onTransformsComboBox(self):
     transformName = self.transformsComboBox.currentText
@@ -126,9 +149,30 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
         transform.show()
       else:
         transform.hide()
+    self.onVolumeSelectorModified()
 
-  def onInputNodeModified(self):
-    self.applyButton.setDisabled(self.inputSelector.currentNode() is None)
+  def onVolumeSelectorModified(self):
+    self.applyButton.setDisabled(
+      self.inputSelector.currentNode() is None
+      or self.currentTransform is None
+    )
+    self.toggleButton.setEnabled(
+      self.inputSelector.currentNode() is not None
+      and self.outputSelector.currentNode() is not None
+    )
+
+  def onToggleButton(self):
+    inputNode = self.inputSelector.currentNode()
+    outputNode = self.outputSelector.currentNode()
+    if self.backgroundNode is None:
+      self.backgroundNode = inputNode
+    self.backgroundNode = outputNode if self.backgroundNode is inputNode else inputNode
+    foregroundNode = outputNode if self.backgroundNode is inputNode else inputNode
+    slicer.util.setSliceViewerLayers(
+      background=self.backgroundNode,
+      foreground=foregroundNode,
+      foregroundOpacity=0,
+    )
 
   def onApplyButton(self):
     inputVolumeNode = self.inputSelector.currentNode()
@@ -144,8 +188,9 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     try:
       outputImage = self.currentTransform(inputVolumeNode)
     except Exception as e:
+      tb = traceback.format_exc()
       message = (
-        f'TorchIO returned the error: {e}'
+        f'TorchIO returned the error: {tb}'
         f'\n\nTransform kwargs:\n{self.currentTransform.getKwargs()}'
       )
       slicer.util.errorDisplay(message)

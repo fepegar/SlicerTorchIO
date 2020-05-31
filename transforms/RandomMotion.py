@@ -7,12 +7,12 @@ from .CoordinatesWidget import CoordinatesWidget
 class RandomMotion(Transform):
     def setup(self):
         degrees = self.getDefaultValue('degrees')
-        self.degreesSlider = self.makeSlider(
+        self.degreesSlider = self.makeRangeWidget(
             -180, -degrees, degrees, 180, 1, 'degrees')
         self.layout.addRow('Degrees: ', self.degreesSlider)
 
         translation = self.getDefaultValue('translation')
-        self.translationSlider = self.makeSlider(
+        self.translationSlider = self.makeRangeWidget(
             -50, -translation, translation, 50, 1, 'translation')
         self.layout.addRow('Translation: ', self.translationSlider)
 

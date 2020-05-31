@@ -67,7 +67,7 @@ class Transform:
     def getInterpolation(self):
         return self.interpolationComboBox.currentText.lower()
 
-    def makeSlider(self, minimum, minimumValue, maximumValue, maximum, step, name):
+    def makeRangeWidget(self, minimum, minimumValue, maximumValue, maximum, step, name):
         slider = slicer.qMRMLRangeWidget()
         slider.minimum = minimum
         slider.maximum = maximum
@@ -75,6 +75,7 @@ class Transform:
         slider.maximumValue = maximumValue
         slider.singleStep = step
         slider.setToolTip(self.getArgDocstring(name))
+        slider.symmetricMoves = True
         return slider
 
     def makeAxesLayout(self):
