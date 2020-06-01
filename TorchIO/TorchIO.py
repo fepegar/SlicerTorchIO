@@ -15,17 +15,10 @@ from slicer.ScriptedLoadableModule import (
 )
 
 
-installLocal = True
-
-
 try:
   import torchio
 except ImportError:
-  if installLocal:
-    repoDir = Path('~/git/torchio').expanduser()
-    slicer.util.pip_install(f'--editable {repoDir}')
-  else:
-    slicer.util.pip_install('torchio')
+  slicer.util.pip_install('torchio')
   import torchio
 
 
@@ -53,14 +46,11 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
   def setup(self):
     ScriptedLoadableModuleWidget.setup(self)
     self.logic = TorchIOLogic()
-    # self.logic.installRepository()
     self.transforms = []
     self.currentTransform = None
     self.makeGUI()
     self.onVolumeSelectorModified()
     slicer.torchio = self
-    import SampleData
-    SampleData.downloadSample('MRHead')
     self.backgroundNode = None
 
   def makeGUI(self):
