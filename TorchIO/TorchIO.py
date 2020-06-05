@@ -1,3 +1,4 @@
+import logging
 import importlib
 import traceback
 from pathlib import Path
@@ -176,12 +177,14 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
       )
       self.outputSelector.currentNodeID = outputVolumeNode.GetID()
     try:
+      kwargs = self.currentTransform.getKwargs()
+      logging.info(f'Transform args: {kwargs}')
       outputImage = self.currentTransform(inputVolumeNode)
     except Exception as e:
       tb = traceback.format_exc()
       message = (
         f'TorchIO returned the error: {tb}'
-        f'\n\nTransform kwargs:\n{self.currentTransform.getKwargs()}'
+        f'\n\nTransform kwargs:\n{kwargs}'
       )
       slicer.util.errorDisplay(message)
       return
