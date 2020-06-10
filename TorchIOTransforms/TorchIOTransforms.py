@@ -19,7 +19,12 @@ from slicer.ScriptedLoadableModule import (
 try:
   import torchio
 except ImportError:
-  slicer.util.pip_install('torchio')
+  message = (
+    'This module requires the "torchio" Python package.'
+    ' Click OK to download it now. It may take a few minutes.'
+  )
+  if slicer.util.confirmOkCancelDisplay(message):
+    slicer.util.pip_install('torchio')
   import torchio
 
 
