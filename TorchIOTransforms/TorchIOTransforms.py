@@ -78,7 +78,7 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
     nodesLayout = qt.QFormLayout(self.nodesButton)
 
     self.inputSelector = slicer.qMRMLNodeComboBox()
-    self.inputSelector.nodeTypes = ['vtkMRMLScalarVolumeNode']
+    self.inputSelector.nodeTypes = ['vtkMRMLVolumeNode']
     self.inputSelector.addEnabled = False
     self.inputSelector.removeEnabled = True
     self.inputSelector.noneEnabled = False
@@ -181,9 +181,10 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
     if outputVolumeNode is None:
       name = f'{inputVolumeNode.GetName()} {self.currentTransform.name}'
       outputVolumeNode = slicer.mrmlScene.AddNewNodeByClass(
-        'vtkMRMLScalarVolumeNode',
+        inputVolumeNode.GetClassName(),
         name,
       )
+      outputVolumeNode.CreateDefaultDisplayNodes()
       self.outputSelector.currentNodeID = outputVolumeNode.GetID()
     try:
       kwargs = self.currentTransform.getKwargs()
@@ -198,6 +199,8 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
       slicer.util.errorDisplay(message)
       return
     su.PushVolumeToSlicer(outputImage, targetNode=outputVolumeNode)
+    inputColorNodeID = inputVolumeNode.GetDisplayNode().GetColorNodeID()
+    outputVolumeNode.GetDisplayNode().SetAndObserveColorNodeID(inputColorNodeID)
     slicer.util.setSliceViewerLayers(background=outputVolumeNode)
 
 
