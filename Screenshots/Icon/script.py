@@ -1,8 +1,9 @@
-from skimage import io
-nw = io.imread('motion.png')
-ne = io.imread('ghosting.png')
-sw = io.imread('spike.png')
-se = io.imread('bias.png')
+import numpy as np
+from PIL import Image
+nw = np.array(Image.open('motion.png'))
+ne = np.array(Image.open('ghosting.png'))
+sw = np.array(Image.open('spike.png'))
+se = np.array(Image.open('bias.png'))
 result = nw.copy()
 si, sj, _ = result.shape
 sih = si // 2
@@ -12,4 +13,6 @@ result[:, sjh:] = ne[:, sjh:]
 result[:, sjh:] = ne[:, sjh:]
 result[sih:, sjh:] = se[sih:, sjh:]
 result = result[:, 80:-74]  # make square
-io.imsave('mosaic.png', result)
+image = Image.fromarray(result)
+image = image.resize((128, 128), Image.LANCZOS)
+image.save('mosaic.png')
