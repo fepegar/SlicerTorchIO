@@ -27,19 +27,28 @@ class TorchIOTransforms(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "TorchIO Transforms"
-    self.parent.categories = ["Utilities"]
+    self.parent.title = 'TorchIO Transforms'
+    self.parent.categories = ['Utilities']
     self.parent.dependencies = []
     self.parent.contributors = [
-      "Fernando Perez-Garcia (University College London)",
+      'Fernando Perez-Garcia'
+      ' (University College London, King\'s College London)'
     ]
-    self.parent.helpText = """[This is the help text.]
-    """
+    self.parent.helpText = (
+      'This module can be used to quickly visualize the effect of each'
+      ' transform parameter. That way, users can have an intuitive feeling of'
+      ' what the output of a transform looks like without any coding at all.\n\n'
+    )
     self.parent.helpText += self.getDefaultModuleDocumentationLink(
       docPage='https://torchio.readthedocs.io/slicer.html')
-    self.parent.acknowledgementText = """
-    University College London.
-    """
+    self.parent.acknowledgementText = (
+      'This work is supported by the EPSRC-funded UCL Centre for Doctoral'
+      ' Training in Medical Imaging (EP/L016478/1). This publication represents'
+      ' in part independent research commissioned by the Wellcome Trust Health'
+      ' Innovation Challenge Fund (WT106882). The views expressed in this'
+      ' publication are those of the authors and not necessarily those of the'
+      ' Wellcome Trust.'
+    )
 
 
 class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
