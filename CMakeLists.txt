@@ -19,7 +19,7 @@ include(${Slicer_USE_FILE})
 
 #-----------------------------------------------------------------------------
 # Extension modules
-add_subdirectory(TorchIO)
+add_subdirectory(TorchIOTransforms)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------

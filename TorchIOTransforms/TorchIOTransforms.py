@@ -23,11 +23,11 @@ except ImportError:
   import torchio
 
 
-class TorchIO(ScriptedLoadableModule):
+class TorchIOTransforms(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "TorchIO"
+    self.parent.title = "TorchIO Transforms"
     self.parent.categories = ["Utilities"]
     self.parent.dependencies = []
     self.parent.contributors = [
@@ -36,17 +36,17 @@ class TorchIO(ScriptedLoadableModule):
     self.parent.helpText = """[This is the help text.]
     """
     self.parent.helpText += self.getDefaultModuleDocumentationLink(
-      docPage='https://github.com/fepegar/SlicerTorchIO')
+      docPage='https://torchio.readthedocs.io/slicer.html')
     self.parent.acknowledgementText = """
     University College London.
     """
 
 
-class TorchIOWidget(ScriptedLoadableModuleWidget):
+class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
 
   def setup(self):
     ScriptedLoadableModuleWidget.setup(self)
-    self.logic = TorchIOLogic()
+    self.logic = TorchIOTransformsLogic()
     self.transforms = []
     self.currentTransform = None
     self.makeGUI()
@@ -192,7 +192,7 @@ class TorchIOWidget(ScriptedLoadableModuleWidget):
     slicer.util.setSliceViewerLayers(background=outputVolumeNode)
 
 
-class TorchIOLogic(ScriptedLoadableModuleLogic):
+class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
   def installRepository(self):
     box = qt.QMessageBox()
@@ -208,7 +208,7 @@ class TorchIOLogic(ScriptedLoadableModuleLogic):
     pass
 
 
-class TorchIOTest(ScriptedLoadableModuleTest):
+class TorchIOTransformsTest(ScriptedLoadableModuleTest):
   """
   This is the test case for your scripted module.
   Uses ScriptedLoadableModuleTest base class, available at:
@@ -224,9 +224,9 @@ class TorchIOTest(ScriptedLoadableModuleTest):
     """Run as few or as many tests as needed here.
     """
     self.setUp()
-    self.test_TorchIO1()
+    self.test_TorchIOTransforms1()
 
-  def test_TorchIO1(self):
+  def test_TorchIOTransforms1(self):
     """ Ideally you should have several levels of tests.  At the lowest level
     tests should exercise the functionality of the logic with different inputs
     (both valid and invalid).  At higher levels your tests should emulate the
