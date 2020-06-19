@@ -1,4 +1,5 @@
 import logging
+import platform
 import importlib
 import traceback
 from pathlib import Path
@@ -15,6 +16,7 @@ from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModuleTest,
 )
 
+WINDOWS_TORCH_INSTALL = 'torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html'
 
 try:
   import torchio
@@ -23,8 +25,25 @@ except ImportError:
     'This module requires the "torchio" Python package.'
     ' Click OK to download it now. It may take a few minutes.'
   )
-  if slicer.util.confirmOkCancelDisplay(message):
-    slicer.util.pip_install('torchio')
+  installTorchIO = slicer.util.confirmOkCancelDisplay(message)
+  if installTorchIO:
+    if platform.system() == 'Windows':
+      try:
+        import torchvision
+        slicer.util.pip_install('torchio')
+      except ImportError:
+        message = (
+          'The following packages will be installed:\n'
+          'torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html'
+          '\n\nIf you would like to install a different version, then click Cancel'
+          ' and install your preferred version before using this module'
+        )
+        installTorchWindows = slicer.util.confirmOkCancelDisplay(message)
+        if installTorchWindows:
+          slicer.util.pip_install(WINDOWS_TORCH_INSTALL)
+          slicer.util.pip_install('torchio')
+    else:
+      slicer.util.pip_install('torchio')
   import torchio
 
 
