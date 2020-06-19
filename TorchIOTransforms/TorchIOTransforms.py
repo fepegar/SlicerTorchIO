@@ -18,33 +18,6 @@ from slicer.ScriptedLoadableModule import (
 
 WINDOWS_TORCH_INSTALL = 'torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html'
 
-try:
-  import torchio
-except ImportError:
-  message = (
-    'This module requires the "torchio" Python package.'
-    ' Click OK to download it now. It may take a few minutes.'
-  )
-  installTorchIO = slicer.util.confirmOkCancelDisplay(message)
-  if installTorchIO:
-    if platform.system() == 'Windows':
-      try:
-        import torchvision
-        slicer.util.pip_install('torchio')
-      except ImportError:
-        message = (
-          'The following packages will be installed:\n'
-          'torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html'
-          '\n\nIf you would like to install a different version, then click Cancel'
-          ' and install your preferred version before using this module'
-        )
-        installTorchWindows = slicer.util.confirmOkCancelDisplay(message)
-        if installTorchWindows:
-          slicer.util.pip_install(WINDOWS_TORCH_INSTALL)
-          slicer.util.pip_install('torchio')
-    else:
-      slicer.util.pip_install('torchio')
-  import torchio
 
 
 class TorchIOTransforms(ScriptedLoadableModule):
@@ -80,6 +53,8 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
   def setup(self):
     ScriptedLoadableModuleWidget.setup(self)
     self.logic = TorchIOTransformsLogic()
+    if not self.logic.checkTorchIO():
+      return
     self.transforms = []
     self.currentTransform = None
     self.makeGUI()
@@ -230,15 +205,48 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
 
 class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
-  def installRepository(self):
-    box = qt.QMessageBox()
-    box.setStandardButtons(0)
-    box.setText('Importing TorchIO Python module...')
-    box.show()
-    slicer.app.processEvents()
+  def pipInstallTorchIO(self):
+    qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
     slicer.util.pip_install('torchio')
-    import torchio
-    box.accept()
+    qt.QApplication.restoreOverrideCursor()
+    slicer.util.delayDisplay('TorchIO was installed successfully', autoCloseMsec=-1)
+
+  def checkTorchIO(self):
+    try:
+      import torchio
+    except ImportError:
+      message = (
+        'This module requires the "torchio" Python package.'
+        ' Click OK to download it now. It may take a few minutes.'
+      )
+      installTorchIO = slicer.util.confirmOkCancelDisplay(message)
+      if installTorchIO:
+        if platform.system() == 'Windows':
+          try:  # if torchvision is already installed
+            import torchvision
+            self.pipInstallTorchIO()
+          except ImportError:
+            qt.QApplication.restoreOverrideCursor()
+            message = (
+              'The following packages will be installed:\n'
+              'torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html'
+              '\n\nIf you would like to install a different version, then click Cancel'
+              ' and install your preferred version before using this module'
+            )
+            installTorchWindows = slicer.util.confirmOkCancelDisplay(message)
+            if installTorchWindows:
+              qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
+              slicer.util.pip_install(WINDOWS_TORCH_INSTALL)
+              self.pipInstallTorchIO()
+            else:
+              return
+          finally:
+            qt.QApplication.restoreOverrideCursor()
+        else:
+          self.pipInstallTorchIO()
+      import torchio
+    logging.info(f'TorchIO version: {torchio.__version__}')
+    return True
 
   def applyTransform(self, inputNode, outputNode, transformName, args, kwargs):
     pass
