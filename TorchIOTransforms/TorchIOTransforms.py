@@ -16,7 +16,8 @@ from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModuleTest,
 )
 
-WINDOWS_TORCH_INSTALL = 'torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html'
+TORCH_VERSION = '1.5.1'
+TORCHVISION_VERSION = '0.6.1'
 
 
 
@@ -205,11 +206,27 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
 
 class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
+  def pipInstallTorch(self):
+    qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
+    slicer.util.pip_install(self.getTorchInstallLine())
+    qt.QApplication.restoreOverrideCursor()
+
   def pipInstallTorchIO(self):
     qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
     slicer.util.pip_install('torchio')
     qt.QApplication.restoreOverrideCursor()
     slicer.util.delayDisplay('TorchIO was installed successfully', autoCloseMsec=-1)
+
+  def getTorchInstallLine(self):
+    if platform.system() == 'Darwin':  # macOS
+      args = ('torch', 'torchvision')
+    else:
+      args = (
+        f'torch=={TORCH_VERSION}+cpu',
+        f'torchvision=={TORCHVISION_VERSION}+cpu',
+        '-f', 'https://download.pytorch.org/whl/torch_stable.html',
+      )
+    return ' '.join(args)
 
   def checkTorchIO(self):
     try:
@@ -221,29 +238,25 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
       )
       installTorchIO = slicer.util.confirmOkCancelDisplay(message)
       if installTorchIO:
-        if platform.system() == 'Windows':
-          try:  # if torchvision is already installed
-            import torchvision
-            self.pipInstallTorchIO()
-          except ImportError:
-            qt.QApplication.restoreOverrideCursor()
-            message = (
-              'The following packages will be installed:\n'
-              'torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html'
-              '\n\nIf you would like to install a different version, then click Cancel'
-              ' and install your preferred version before using this module'
-            )
-            installTorchWindows = slicer.util.confirmOkCancelDisplay(message)
-            if installTorchWindows:
-              qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-              slicer.util.pip_install(WINDOWS_TORCH_INSTALL)
-              self.pipInstallTorchIO()
-            else:
-              return
-          finally:
-            qt.QApplication.restoreOverrideCursor()
-        else:
+        try:  # if torchvision is already installed
+          import torchvision
           self.pipInstallTorchIO()
+        except ImportError:
+          qt.QApplication.restoreOverrideCursor()
+          message = (
+            'The following packages will be installed first:\n'
+            f'{self.getTorchInstallLine()}'
+            '\n\nIf you would like to install a different version, then click Cancel'
+            ' and install your preferred version before using this module'
+          )
+          installTorch = slicer.util.confirmOkCancelDisplay(message)
+          if installTorch:
+            self.pipInstallTorch()
+            self.pipInstallTorchIO()
+          else:
+            return
+        finally:
+          qt.QApplication.restoreOverrideCursor()
       import torchio
     logging.info(f'TorchIO version: {torchio.__version__}')
     return True
