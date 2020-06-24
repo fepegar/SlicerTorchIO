@@ -204,8 +204,13 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
       slicer.util.errorDisplay(message)
       return
     su.PushVolumeToSlicer(outputImage, targetNode=outputVolumeNode)
-    inputColorNodeID = inputVolumeNode.GetDisplayNode().GetColorNodeID()
-    outputVolumeNode.GetDisplayNode().SetAndObserveColorNodeID(inputColorNodeID)
+    inputDisplayNode = inputVolumeNode.GetDisplayNode()
+    inputColorNodeID = inputDisplayNode.GetColorNodeID()
+    outputDisplayNode = outputVolumeNode.GetDisplayNode()
+    outputDisplayNode.SetAndObserveColorNodeID(inputColorNodeID)
+    outputDisplayNode.SetAutoWindowLevel(False)
+    wmin, wmax = inputDisplayNode.GetWindowLevelMin(), inputDisplayNode.GetWindowLevelMax()
+    outputDisplayNode.SetWindowLevelMinMax(wmin, wmax)
     slicer.util.setSliceViewerLayers(background=outputVolumeNode)
 
 
