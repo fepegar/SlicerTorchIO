@@ -15,7 +15,7 @@ class RandomSpike(Transform):
 
         self.intensitySlider = slicer.qMRMLSliderWidget()
         self.intensitySlider.singleStep = 0.01
-        self.intensitySlider.maximum = 1
+        self.intensitySlider.maximum = 5
         self.intensitySlider.value = np.mean(self.getDefaultValue('intensity'))
         self.layout.addRow('Intensity: ', self.intensitySlider)
 
