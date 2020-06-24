@@ -30,15 +30,14 @@ class TorchIOTransforms(ScriptedLoadableModule):
     self.parent.dependencies = []
     self.parent.contributors = [
       'Fernando Perez-Garcia'
-      ' (University College London, King\'s College London)'
+      ' (University College London and King\'s College London)'
     ]
     self.parent.helpText = (
       'This module can be used to quickly visualize the effect of each'
       ' transform parameter. That way, users can have an intuitive feeling of'
       ' what the output of a transform looks like without any coding at all.\n\n'
     )
-    self.parent.helpText += self.getDefaultModuleDocumentationLink(
-      docPage='https://torchio.readthedocs.io/slicer.html')
+    self.parent.helpText += self.getDefaultModuleDocumentationLink()
     self.parent.acknowledgementText = (
       'This work is supported by the EPSRC-funded UCL Centre for Doctoral'
       ' Training in Medical Imaging (EP/L016478/1). This publication represents'
@@ -47,6 +46,11 @@ class TorchIOTransforms(ScriptedLoadableModule):
       ' publication are those of the authors and not necessarily those of the'
       ' Wellcome Trust.'
     )
+
+  def getDefaultModuleDocumentationLink(self):
+    docsUrl = 'https://torchio.readthedocs.io/slicer.html'
+    linkText = f'See <a href="{docsUrl}">the documentation</a> for more information.'
+    return linkText
 
 
 class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
@@ -88,6 +92,7 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
 
     self.outputSelector = slicer.qMRMLNodeComboBox()
     self.outputSelector.nodeTypes = ['vtkMRMLScalarVolumeNode']
+    self.outputSelector.selectNodeUponCreation = False
     self.outputSelector.addEnabled = False
     self.outputSelector.removeEnabled = True
     self.outputSelector.noneEnabled = True
