@@ -113,7 +113,7 @@ class Transform:
     def getSliderRange(self, slider):
         return slider.minimumValue, slider.maximumValue
 
-    def __call__(self, inputVolumeNode):
+    def __call__(self, inputVolumeNode, outputVolumeNode):
         image = su.PullVolumeFromSlicer(inputVolumeNode)
         data, affine = torchio.utils.sitk_to_nib(image)
         tensor = torch.from_numpy(data.astype(np.float32))  # why do I need this? Open a TorchIO issue?
@@ -123,4 +123,5 @@ class Transform:
         tensor = transformed['img'][torchio.DATA]
         affine = transformed['img'][torchio.AFFINE]
         image = torchio.utils.nib_to_sitk(tensor, affine)
-        return image
+        su.PushVolumeToSlicer(image, targetNode=outputVolumeNode)
+        return outputVolumeNode

@@ -20,6 +20,16 @@ TORCH_VERSION = '1.5.1'
 TORCHVISION_VERSION = '0.6.1'
 
 
+TRANSFORMS = [
+  'RandomSpike',
+  'RandomAffine',
+  'RandomMotion',
+  'RandomGhosting',
+  'RandomBiasField',
+  'RandomElasticDeformation',
+  'HistogramStandardization',
+]
+
 
 class TorchIOTransforms(ScriptedLoadableModule):
 
@@ -111,19 +121,9 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
     self.transformsLayout.addWidget(self.transformsComboBox)
 
   def addTransforms(self):
-    transformNames = [
-      'RandomSpike',
-      'RandomAffine',
-      'RandomMotion',
-      'RandomGhosting',
-      'RandomBiasField',
-      'RandomElasticDeformation',
-      'HistogramStandardization',
-    ]
-    self.transformsComboBox.addItems(transformNames)
-    for transformName in transformNames:
-      klass = getattr(importlib.import_module('transforms'), transformName)
-      transform = klass()
+    self.transformsComboBox.addItems(TRANSFORMS)
+    for transformName in TRANSFORMS:
+      transform = self.logic.getTransform(transformName)
       self.transforms.append(transform)
       transform.hide()
       self.transformsLayout.addWidget(transform.groupBox)
@@ -194,7 +194,7 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
     try:
       kwargs = self.currentTransform.getKwargs()
       logging.info(f'Transform args: {kwargs}')
-      outputImage = self.currentTransform(inputVolumeNode)
+      outputImage = self.currentTransform(inputVolumeNode, outputVolumeNode)
     except Exception as e:
       tb = traceback.format_exc()
       message = (
@@ -203,7 +203,6 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
       )
       slicer.util.errorDisplay(message)
       return
-    su.PushVolumeToSlicer(outputImage, targetNode=outputVolumeNode)
     inputDisplayNode = inputVolumeNode.GetDisplayNode()
     inputColorNodeID = inputDisplayNode.GetColorNodeID()
     outputDisplayNode = outputVolumeNode.GetDisplayNode()
@@ -271,50 +270,55 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     logging.info(f'TorchIO version: {torchio.__version__}')
     return True
 
-  def applyTransform(self, inputNode, outputNode, transformName, args, kwargs):
-    pass
+  def getTransform(self, transformName):
+    return getattr(importlib.import_module('transforms'), transformName)()
+
+  def applyTransform(self, inputNode, outputNode, transformName):
+    if outputNode is None:
+      outputNode = slicer.mrmlScene.AddNewNodeByClass(inputNode.GetClassName())
+    return self.getTransform(transformName)(inputNode, outputNode)
 
 
 class TorchIOTransformsTest(ScriptedLoadableModuleTest):
-  """
-  This is the test case for your scripted module.
-  Uses ScriptedLoadableModuleTest base class, available at:
-  https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
-  """
-
   def setUp(self):
     """ Do whatever is needed to reset the state - typically a scene clear will be enough.
     """
     slicer.mrmlScene.Clear(0)
+    self.landmarksPath = Path(slicer.util.tempDirectory()) / 'landmarks.npy'
+    landmarks = np.array(
+      [3.55271368e-15, 7.04965436e-02, 5.11962268e-01, 8.81293798e-01,
+       1.08523250e+00, 1.51833266e+00, 3.08140233e+00, 1.15454687e+01,
+       2.78108498e+01, 3.42262691e+01, 3.99556984e+01, 5.26837071e+01,
+       1.00000000e+02]
+    )
+    np.save(self.landmarksPath, landmarks)
+    # Landmarks unused for now
+
+  def tearDown(self):
+    self.landmarksPath.unlink()
 
   def runTest(self):
     """Run as few or as many tests as needed here.
     """
     self.setUp()
-    self.test_TorchIOTransforms1()
+    self.test_TorchIOTransforms()
+    self.tearDown()
 
-  def test_TorchIOTransforms1(self):
-    """ Ideally you should have several levels of tests.  At the lowest level
-    tests should exercise the functionality of the logic with different inputs
-    (both valid and invalid).  At higher levels your tests should emulate the
-    way the user would interact with your code and confirm that it still works
-    the way you intended.
-    One of the most important features of the tests is that it should alert other
-    developers when their changes will have an impact on the behavior of your
-    module.  For example, if a developer removes a feature that you depend on,
-    your test should break so they know that the feature is needed.
-    """
-
+  def test_TorchIOTransforms(self):
     self.delayDisplay("Starting the test")
-    #
-    # first, get some data
-    #
     import SampleData
-    SampleData.downloadFromURL(
-      nodeNames='FA',
-      fileNames='FA.nrrd',
-      uris='http://slicer.kitware.com/midas3/download?items=5767',
-      checksums='SHA256:12d17fba4f2e1f1a843f0757366f28c3f3e1a8bb38836f0de2a32bb1cd476560')
+    volumeNode = SampleData.downloadSample('MRHead')
     self.delayDisplay('Finished with download and loading')
-    volumeNode = slicer.util.getNode(pattern="FA")
+    logic = TorchIOTransformsLogic()
+    for transformName in TRANSFORMS:
+      if transformName == 'HistogramStandardization':
+        # This transform can't be run with default input parameters
+        continue
+      self.delayDisplay(f'Applying {transformName}...')
+      logic.applyTransform(
+        volumeNode,
+        volumeNode,
+        transformName,
+      )
+      self.delayDisplay(f'{transformName} passed!')
     self.delayDisplay('Test passed!')
