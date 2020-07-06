@@ -284,6 +284,10 @@ class TorchIOTransformsTest(ScriptedLoadableModuleTest):
     """ Do whatever is needed to reset the state - typically a scene clear will be enough.
     """
     slicer.mrmlScene.Clear(0)
+    logic = TorchIOTransformsLogic()
+    logic.pipInstallTorch()
+    logic.pipInstallTorchIO()
+
     self.landmarksPath = Path(slicer.util.tempDirectory()) / 'landmarks.npy'
     landmarks = np.array(
       [3.55271368e-15, 7.04965436e-02, 5.11962268e-01, 8.81293798e-01,
