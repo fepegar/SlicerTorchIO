@@ -215,16 +215,19 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
 
 class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
-  def pipInstallTorch(self):
+  def pipInstallTorch(self, keepDialog=False):
     qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
     slicer.util.pip_install(self.getTorchInstallLine())
     qt.QApplication.restoreOverrideCursor()
+    kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
+    slicer.util.delayDisplay('PyTorch was installed successfully', **kwargs)
 
-  def pipInstallTorchIO(self):
+  def pipInstallTorchIO(self, keepDialog=False):
     qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
     slicer.util.pip_install('torchio')
     qt.QApplication.restoreOverrideCursor()
-    slicer.util.delayDisplay('TorchIO was installed successfully', autoCloseMsec=-1)
+    kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
+    slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
 
   def getTorchInstallLine(self):
     if platform.system() == 'Darwin':  # macOS
