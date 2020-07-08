@@ -91,6 +91,10 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
     self.layout.addWidget(self.nodesButton)
     nodesLayout = qt.QFormLayout(self.nodesButton)
 
+    goToSampleDataButton = qt.QPushButton('Go to Sample Data module')
+    goToSampleDataButton.clicked.connect(lambda: slicer.util.selectModule('SampleData'))
+    nodesLayout.addWidget(goToSampleDataButton)
+
     self.inputSelector = slicer.qMRMLNodeComboBox()
     self.inputSelector.nodeTypes = ['vtkMRMLVolumeNode']
     self.inputSelector.addEnabled = False
