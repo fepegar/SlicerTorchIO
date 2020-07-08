@@ -285,6 +285,35 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
       outputNode = slicer.mrmlScene.AddNewNodeByClass(inputNode.GetClassName())
     return self.getTransform(transformName)(inputNode, outputNode)
 
+  def getNodesFromSubject(self, subject):
+    nodes = {}
+    for name, image in subject.get_images_dict(intensity_only=False).items():
+      nodes[name] = self.getNodeFromImage(image, name=name)
+    return nodes
+
+  def getNodeFromImage(self, image, name=None):
+    import torchio
+    if image.type == torchio.LABEL:
+      className = 'vtkMRMLLabelMapVolumeNode'
+    else:
+      className = 'vtkMRMLScalarVolumeNode'
+    return su.PushVolumeToSlicer(image.as_sitk(), name=name, className=className)
+
+  def getColin(self, version=1998):
+    import torchio
+    colin = torchio.datasets.Colin27(version=version)
+    nodes = self.getNodesFromSubject(colin)
+    if version == 1998:
+      slicer.util.setSliceViewerLayers(
+        background=nodes['t1'],
+        label=nodes['brain'],
+      )
+    elif version == 2008:
+      slicer.util.setSliceViewerLayers(
+        background=nodes['t1'],
+        foreground=nodes['t2'],
+      )
+
 
 class TorchIOTransformsTest(ScriptedLoadableModuleTest):
   def setUp(self):
