@@ -26,6 +26,7 @@ TRANSFORMS = [
   'RandomMotion',
   'RandomGhosting',
   'RandomBiasField',
+  'RandomDownsample',
   'RandomElasticDeformation',
   'HistogramStandardization',
 ]
@@ -211,10 +212,13 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
     inputColorNodeID = inputDisplayNode.GetColorNodeID()
     outputDisplayNode = outputVolumeNode.GetDisplayNode()
     outputDisplayNode.SetAndObserveColorNodeID(inputColorNodeID)
-    outputDisplayNode.SetAutoWindowLevel(False)
-    wmin, wmax = inputDisplayNode.GetWindowLevelMin(), inputDisplayNode.GetWindowLevelMax()
-    outputDisplayNode.SetWindowLevelMinMax(wmin, wmax)
-    slicer.util.setSliceViewerLayers(background=outputVolumeNode)
+    if outputVolumeNode.IsA('vtkMRMLLabelMapVolumeNode'):
+      slicer.util.setSliceViewerLayers(label=outputVolumeNode)
+    else:
+      outputDisplayNode.SetAutoWindowLevel(False)
+      wmin, wmax = inputDisplayNode.GetWindowLevelMin(), inputDisplayNode.GetWindowLevelMax()
+      outputDisplayNode.SetWindowLevelMinMax(wmin, wmax)
+      slicer.util.setSliceViewerLayers(background=outputVolumeNode)
 
 
 class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
