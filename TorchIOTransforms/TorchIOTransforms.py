@@ -1,6 +1,5 @@
 import logging
 import platform
-import importlib
 import traceback
 from pathlib import Path
 
@@ -251,7 +250,10 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
   def checkTorchIO(self):
     try:
       import torchio
-    except ImportError:
+      # torchio is imported as "namespace" if the parent path of the repository
+      # is in Slicer's sys.path (I think)
+      version = torchio.__version__
+    except (ImportError, AttributeError):
       message = (
         'This module requires the "torchio" Python package.'
         ' Click OK to download it now. It may take a few minutes.'
@@ -263,9 +265,10 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
           self.pipInstallTorchIO()
         except ImportError:
           qt.QApplication.restoreOverrideCursor()
+          packages = '\n'.join(self.getTorchInstallLine().split())
           message = (
-            'The following packages will be installed first:\n'
-            f'{self.getTorchInstallLine()}'
+            'The following packages will be installed first:\n\n'
+            f'{packages}'
             '\n\nIf you would like to install a different version, then click Cancel'
             ' and install your preferred version before using this module'
           )
@@ -282,7 +285,8 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     return True
 
   def getTransform(self, transformName):
-    return getattr(importlib.import_module('transforms'), transformName)()
+    import transforms
+    return getattr(transforms, transformName)()
 
   def applyTransform(self, inputNode, outputNode, transformName):
     if outputNode is None:
