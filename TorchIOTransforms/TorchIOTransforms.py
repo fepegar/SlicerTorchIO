@@ -231,13 +231,16 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
   def pipInstallTorchIO(self, keepDialog=False):
     qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-    slicer.util.pip_install('torchio')
+    slicer.util.pip_install(self.getTorchIOInstallLine())
     qt.QApplication.restoreOverrideCursor()
     kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
     slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
 
+  def isMac(self):
+    return platform.system() == 'Darwin'
+
   def getTorchInstallLine(self):
-    if platform.system() == 'Darwin':  # macOS
+    if self.isMac():
       args = ('torch', 'torchvision')
     else:
       args = (
@@ -246,6 +249,17 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
         '-f', 'https://download.pytorch.org/whl/torch_stable.html',
       )
     return ' '.join(args)
+
+  def getTorchIOInstallLine(self):
+    major = slicer.app.majorVersion
+    if major < 4:
+      slicer.util.errorDisplay('This Slicer is too old. Please use Slicer 4.X')
+      return
+    # Hack until Preview versio works again for macOS
+    minor = slicer.app.minorVersion
+    if minor <= 11 and self.isMac():
+      return 'torchio==0.17.45'  # last version with SimpleITK 1
+    return 'torchio'
 
   def checkTorchIO(self):
     try:
