@@ -2,6 +2,7 @@ import logging
 import platform
 import traceback
 from pathlib import Path
+from contextlib import contextmanager
 
 import numpy as np
 import SimpleITK as sitk
@@ -231,7 +232,8 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
   def pipInstallTorchIO(self, keepDialog=False):
     qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-    slicer.util.pip_install(self.getTorchIOInstallLine())
+    with self.peakPythonConsole():
+      slicer.util.pip_install(self.getTorchIOInstallLine())
     qt.QApplication.restoreOverrideCursor()
     kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
     slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
@@ -297,6 +299,17 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
       import torchio
     logging.info(f'TorchIO version: {torchio.__version__}')
     return True
+
+  def getPythonConsoleWidget(self):
+    return slicer.util.mainWindow().pythonConsole().parent()
+
+  @contextmanager
+  def peakPythonConsole(self):
+    console = self.getPythonConsoleWidget()
+    pythonVisible = console.visible
+    console.setVisible(True)
+    yield
+    console.setVisible(pythonVisible)
 
   def getTransform(self, transformName):
     import transforms
