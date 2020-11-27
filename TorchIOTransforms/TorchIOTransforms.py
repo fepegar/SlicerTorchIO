@@ -16,8 +16,8 @@ from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModuleTest,
 )
 
-TORCH_VERSION = '1.5.1'
-TORCHVISION_VERSION = '0.6.1'
+TORCH_VERSION = '1.7.0'
+TORCHVISION_VERSION = '0.8.1'
 
 
 TRANSFORMS = [
