@@ -312,8 +312,8 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     console.setVisible(pythonVisible)
 
   def getTransform(self, transformName):
-    import transforms
-    return getattr(transforms, transformName)()
+    import TorchIOTransformsLib
+    return getattr(TorchIOTransformsLib, transformName)()
 
   def applyTransform(self, inputNode, outputNode, transformName):
     if outputNode is None:
