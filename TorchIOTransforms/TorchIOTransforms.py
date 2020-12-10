@@ -234,6 +234,8 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
     with self.peakPythonConsole():
       slicer.util.pip_install(self.getTorchIOInstallLine())
+    self.checkLinuxPreviewError('pillow')
+    self.checkLinuxPreviewError('scipy')
     qt.QApplication.restoreOverrideCursor()
     kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
     slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
@@ -262,6 +264,16 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     if minor <= 11 and self.isMac():
       return 'torchio==0.17.45'  # last version with SimpleITK 1
     return 'torchio'
+
+  def checkLinuxPreviewError(self, package):
+    # https://discourse.slicer.org/t/slicer-4-11-20200930-cant-import-pip-installed-pillow-on-linux/14448/5
+    import platform
+    if platform.system() != 'Linux':
+      return
+    try:
+      from PIL import Image
+    except ImportError:
+      slicer.util.pip_install(f'--upgrade {package} --force-reinstall')
 
   def checkTorchIO(self):
     try:
