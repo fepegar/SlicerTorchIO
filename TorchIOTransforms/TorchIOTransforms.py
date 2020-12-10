@@ -26,7 +26,7 @@ TRANSFORMS = [
   'RandomMotion',
   'RandomGhosting',
   'RandomBiasField',
-  'RandomDownsample',
+  'RandomAnisotropy',
   'RandomElasticDeformation',
   'HistogramStandardization',
 ]

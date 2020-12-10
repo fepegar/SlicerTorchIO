@@ -5,7 +5,7 @@ from .Transform import Transform
 from .CoordinatesWidget import CoordinatesWidget
 
 
-class RandomDownsample(Transform):
+class RandomAnisotropy(Transform):
     def setup(self):
         self.axesLayout, self.axesDict = self.makeAxesLayout()
         self.layout.addRow('Axes: ', self.axesLayout)
