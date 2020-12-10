@@ -5,7 +5,8 @@ from .Transform import Transform
 
 class RandomAffine(Transform):
     def setup(self):
-        scales = self.getDefaultValue('scales')
+        scale = self.getDefaultValue('scales')
+        scales = 1 - scale, 1 + scale
         self.scalesSlider = self.makeRangeWidget(0.5, *scales, 2, 0.01, 'scales')
         self.layout.addRow('Scales: ', self.scalesSlider)
 
