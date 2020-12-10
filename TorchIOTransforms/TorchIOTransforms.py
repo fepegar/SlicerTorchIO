@@ -259,10 +259,6 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     if major < 4:
       slicer.util.errorDisplay('This Slicer is too old. Please use Slicer 4.X')
       return
-    # Hack until Preview versio works again for macOS
-    minor = slicer.app.minorVersion
-    if minor <= 11 and self.isMac():
-      return 'torchio==0.17.45'  # last version with SimpleITK 1
     return 'torchio'
 
   def checkLinuxPreviewError(self, package):
@@ -271,8 +267,12 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     if platform.system() != 'Linux':
       return
     try:
-      from PIL import Image
+      if package == 'pillow':
+        from PIL import Image
+      elif package == 'scipy':
+        from scipy import special
     except ImportError:
+      print(f'Installing {package}...')
       slicer.util.pip_install(f'--upgrade {package} --force-reinstall')
 
   def checkTorchIO(self):
