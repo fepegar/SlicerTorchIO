@@ -56,7 +56,7 @@ class Transform:
         return klass(*args, **kwargs)
 
     def makeInterpolationComboBox(self):
-        from torchio import Interpolation
+        from torchio.transforms.interpolation import Interpolation
         values = [key.name.lower().capitalize() for key in Interpolation]
         comboBox = qt.QComboBox()
         comboBox.addItems(values)
