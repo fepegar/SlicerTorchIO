@@ -232,13 +232,17 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
   def pipInstallTorchIO(self, keepDialog=False):
     qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-    with self.peakPythonConsole():
-      slicer.util.pip_install(self.getTorchIOInstallLine())
     self.checkLinuxPreviewError('pillow')
     self.checkLinuxPreviewError('scipy')
+    self.installRequirements()
+    with self.peakPythonConsole():
+      slicer.util.pip_install(self.getTorchIOInstallLine(dependencies=False))
     qt.QApplication.restoreOverrideCursor()
     kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
     slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
+
+  def installRequirements(self):
+    slicer.util.pip_install('humanize nibabel tqdm')
 
   def isMac(self):
     return platform.system() == 'Darwin'
@@ -254,12 +258,13 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
       )
     return ' '.join(args)
 
-  def getTorchIOInstallLine(self):
+  def getTorchIOInstallLine(self, dependencies=True):
     major = slicer.app.majorVersion
     if major < 4:
       slicer.util.errorDisplay('This Slicer is too old. Please use Slicer 4.X')
       return
-    return 'torchio'
+    deps = '' if dependencies else ' --no-dependencies'
+    return 'torchio' + deps
 
   def checkLinuxPreviewError(self, package):
     # https://discourse.slicer.org/t/slicer-4-11-20200930-cant-import-pip-installed-pillow-on-linux/14448/5
@@ -309,7 +314,18 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
         finally:
           qt.QApplication.restoreOverrideCursor()
       import torchio
-    logging.info(f'TorchIO version: {torchio.__version__}')
+    try:
+      logging.info(f'TorchIO version: {torchio.__version__}')
+    except AttributeError:
+      message = (
+        'TorchIO will be available after restarting Slicer.'
+        ' Do you want to restart now?'
+      )
+      restart = slicer.util.confirmOkCancelDisplay(message)
+      if restart:
+        slicer.util.restart()
+      else:
+        return False
     return True
 
   def getPythonConsoleWidget(self):
