@@ -9,7 +9,7 @@ set(MODULE_PYTHON_SCRIPTS
   ${MODULE_NAME}Lib/HistogramStandardization
   ${MODULE_NAME}Lib/RandomAffine
   ${MODULE_NAME}Lib/RandomBiasField
-  ${MODULE_NAME}Lib/RandomDownsample
+  ${MODULE_NAME}Lib/RandomAnisotropy
   ${MODULE_NAME}Lib/RandomElasticDeformation
   ${MODULE_NAME}Lib/RandomGhosting
   ${MODULE_NAME}Lib/RandomMotion
