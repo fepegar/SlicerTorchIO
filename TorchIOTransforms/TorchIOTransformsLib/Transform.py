@@ -115,13 +115,13 @@ class Transform:
 
     def __call__(self, inputVolumeNode, outputVolumeNode):
         image = su.PullVolumeFromSlicer(inputVolumeNode)
-        data, affine = torchio.utils.sitk_to_nib(image)
+        data, affine = torchio.io.sitk_to_nib(image)
         tensor = torch.from_numpy(data.astype(np.float32))  # why do I need this? Open a TorchIO issue?
         if inputVolumeNode.IsA('vtkMRMLScalarVolumeNode'):
             image = torchio.ScalarImage(tensor=tensor, affine=affine)
         elif inputVolumeNode.IsA('vtkMRMLLabelMapVolumeNode'):
             image = torchio.LabelMap(tensor=tensor, affine=affine)
         transformed = self.getTransform()(image)
-        image = torchio.utils.nib_to_sitk(transformed.data, transformed.affine)
+        image = torchio.io.nib_to_sitk(transformed.data, transformed.affine)
         su.PushVolumeToSlicer(image, targetNode=outputVolumeNode)
         return outputVolumeNode
