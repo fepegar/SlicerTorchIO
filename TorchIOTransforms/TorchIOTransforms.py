@@ -16,8 +16,7 @@ from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModuleTest,
 )
 
-TORCH_VERSION = '1.7.0'
-TORCHVISION_VERSION = '0.8.1'
+TORCH_VERSION = '1.7.1'
 
 
 TRANSFORMS = [
@@ -249,11 +248,10 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
   def getTorchInstallLine(self):
     if self.isMac():
-      args = ('torch', 'torchvision')
+      args = ('torch',)
     else:
       args = (
         f'torch=={TORCH_VERSION}+cpu',
-        f'torchvision=={TORCHVISION_VERSION}+cpu',
         '-f', 'https://download.pytorch.org/whl/torch_stable.html',
       )
     return ' '.join(args)
@@ -293,8 +291,8 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
       )
       installTorchIO = slicer.util.confirmOkCancelDisplay(message)
       if installTorchIO:
-        try:  # if torchvision is already installed
-          import torchvision
+        try:  # if torch is already installed
+          import torch
           self.pipInstallTorchIO()
         except ImportError:
           qt.QApplication.restoreOverrideCursor()
