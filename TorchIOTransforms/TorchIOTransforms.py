@@ -223,20 +223,18 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
 class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
   def pipInstallTorch(self, keepDialog=False):
-    qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-    slicer.util.pip_install(self.getTorchInstallLine())
-    qt.QApplication.restoreOverrideCursor()
+    with self.showWaitCursor():
+      slicer.util.pip_install(self.getTorchInstallLine())
     kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
     slicer.util.delayDisplay('PyTorch was installed successfully', **kwargs)
 
   def pipInstallTorchIO(self, keepDialog=False):
-    qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-    self.checkLinuxPreviewError('pillow')
-    self.checkLinuxPreviewError('scipy')
-    self.installRequirements()
-    with self.peakPythonConsole():
-      slicer.util.pip_install(self.getTorchIOInstallLine(dependencies=False))
-    qt.QApplication.restoreOverrideCursor()
+    with self.showWaitCursor():
+      self.checkLinuxPreviewError('pillow')
+      self.checkLinuxPreviewError('scipy')
+      self.installRequirements()
+      with self.peakPythonConsole():
+        slicer.util.pip_install(self.getTorchIOInstallLine(dependencies=False))
     kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
     slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
 
@@ -339,6 +337,12 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     yield
     console.setVisible(pythonVisible)
 
+  @contextmanager
+  def showWaitCursor(self):
+    qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
+    yield
+    qt.QApplication.restoreOverrideCursor()
+
   def getTransform(self, transformName):
     import TorchIOTransformsLib
     return getattr(TorchIOTransformsLib, transformName)()
@@ -346,7 +350,9 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
   def applyTransform(self, inputNode, outputNode, transformName):
     if outputNode is None:
       outputNode = slicer.mrmlScene.AddNewNodeByClass(inputNode.GetClassName())
-    return self.getTransform(transformName)(inputNode, outputNode)
+    transform = self.getTransform(transformName)
+    with self.showWaitCursor():
+      transform(inputNode, outputNode)
 
   def getNodesFromSubject(self, subject):
     nodes = {}
