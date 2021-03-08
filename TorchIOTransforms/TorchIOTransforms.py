@@ -293,7 +293,8 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
       if installTorchIO:
         try:  # if torch is already installed
           import torch
-          self.pipInstallTorchIO()
+          with self.peakPythonConsole():
+            self.pipInstallTorchIO()
         except ImportError:
           qt.QApplication.restoreOverrideCursor()
           packages = '\n'.join(self.getTorchInstallLine().split())
@@ -305,8 +306,9 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
           )
           installTorch = slicer.util.confirmOkCancelDisplay(message)
           if installTorch:
-            self.pipInstallTorch()
-            self.pipInstallTorchIO()
+            with self.peakPythonConsole():
+              self.pipInstallTorch()
+              self.pipInstallTorchIO()
           else:
             return
         finally:
