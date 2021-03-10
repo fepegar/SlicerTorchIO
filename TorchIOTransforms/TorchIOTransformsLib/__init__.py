@@ -1,3 +1,4 @@
+from .RandomBlur import RandomBlur
 from .RandomSpike import RandomSpike
 from .RandomAffine import RandomAffine
 from .RandomMotion import RandomMotion
