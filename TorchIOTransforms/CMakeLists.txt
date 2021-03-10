@@ -8,6 +8,7 @@ set(MODULE_PYTHON_SCRIPTS
   ${MODULE_NAME}Lib/CoordinatesWidget
   ${MODULE_NAME}Lib/HistogramStandardization
   ${MODULE_NAME}Lib/RandomAffine
+  ${MODULE_NAME}Lib/RandomGamma
   ${MODULE_NAME}Lib/RandomBlur
   ${MODULE_NAME}Lib/RandomBiasField
   ${MODULE_NAME}Lib/RandomAnisotropy

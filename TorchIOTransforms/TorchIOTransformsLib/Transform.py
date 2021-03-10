@@ -1,3 +1,4 @@
+import logging
 import inspect
 import importlib
 
@@ -120,7 +121,11 @@ class Transform:
             image = torchio.ScalarImage(tensor=tensor, affine=affine)
         elif inputVolumeNode.IsA('vtkMRMLLabelMapVolumeNode'):
             image = torchio.LabelMap(tensor=tensor, affine=affine)
-        transformed = self.getTransform()(image)
-        image = torchio.io.nib_to_sitk(transformed.data, transformed.affine)
+        subject = torchio.Subject(image=image)  # to get transform history
+        transformed = self.getTransform()(subject)
+        deterministicApplied = transformed.get_applied_transforms()[0]
+        logging.info(f'Applied transform: {deterministicApplied}')
+        transformedImage = transformed.image
+        image = torchio.io.nib_to_sitk(transformedImage.data, transformedImage.affine)
         su.PushVolumeToSlicer(image, targetNode=outputVolumeNode)
         return outputVolumeNode

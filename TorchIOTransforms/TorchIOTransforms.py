@@ -23,6 +23,7 @@ TRANSFORMS = list(sorted([
   'RandomBlur',
   'RandomSpike',
   'RandomAffine',
+  'RandomGamma',
   'RandomMotion',
   'RandomGhosting',
   'RandomBiasField',

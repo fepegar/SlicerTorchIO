@@ -1,4 +1,5 @@
 from .RandomBlur import RandomBlur
+from .RandomGamma import RandomGamma
 from .RandomSpike import RandomSpike
 from .RandomAffine import RandomAffine
 from .RandomMotion import RandomMotion
