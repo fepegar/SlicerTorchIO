@@ -224,21 +224,23 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
 
 class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
 
-  def pipInstallTorch(self, keepDialog=False):
-    with self.showWaitCursor():
+  def pipInstallTorch(self, keepDialog=False, showDialog=True):
+    with self.showWaitCursor(show=showDialog):
       slicer.util.pip_install(self.getTorchInstallLine())
-    kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
-    slicer.util.delayDisplay('PyTorch was installed successfully', **kwargs)
+    if showDialog:
+      kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
+      slicer.util.delayDisplay('PyTorch was installed successfully', **kwargs)
 
-  def pipInstallTorchIO(self, keepDialog=False):
-    with self.showWaitCursor():
+  def pipInstallTorchIO(self, keepDialog=False, showDialog=True):
+    with self.showWaitCursor(show=showDialog):
       self.checkLinuxPreviewError('pillow')
       self.checkLinuxPreviewError('scipy')
       self.installRequirements()
-      with self.peakPythonConsole():
+      with self.peakPythonConsole(show=showDialog):
         slicer.util.pip_install(self.getTorchIOInstallLine(dependencies=False))
-    kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
-    slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
+    if showDialog:
+      kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
+      slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
 
   def installRequirements(self):
     slicer.util.pip_install('humanize nibabel tqdm')
@@ -332,18 +334,22 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     return slicer.util.mainWindow().pythonConsole().parent()
 
   @contextmanager
-  def peakPythonConsole(self):
-    console = self.getPythonConsoleWidget()
-    pythonVisible = console.visible
-    console.setVisible(True)
+  def peakPythonConsole(self, show=True):
+    if show:
+      console = self.getPythonConsoleWidget()
+      pythonVisible = console.visible
+      console.setVisible(True)
     yield
-    console.setVisible(pythonVisible)
+    if show:
+      console.setVisible(pythonVisible)
 
   @contextmanager
-  def showWaitCursor(self):
-    qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
+  def showWaitCursor(self, show=True):
+    if show:
+      qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
     yield
-    qt.QApplication.restoreOverrideCursor()
+    if show:
+      qt.QApplication.restoreOverrideCursor()
 
   def getTransform(self, transformName):
     import TorchIOTransformsLib
@@ -392,8 +398,8 @@ class TorchIOTransformsTest(ScriptedLoadableModuleTest):
     """
     slicer.mrmlScene.Clear(0)
     logic = TorchIOTransformsLogic()
-    logic.pipInstallTorch()
-    logic.pipInstallTorchIO()
+    logic.pipInstallTorch(showDialog=False)
+    logic.pipInstallTorchIO(showDialog=False)
 
     self.landmarksPath = Path(slicer.util.tempDirectory()) / 'landmarks.npy'
     landmarks = np.array(
