@@ -1,4 +1,8 @@
-# TorchIO
+<p align="center">
+  <a href="http://torchio.rtfd.io/">
+    <img src="https://raw.githubusercontent.com/fepegar/torchio/master/docs/source/favicon_io/for_readme_2000x462.png" alt="TorchIO logo">
+  </a>
+</p>
 
 > *Tools like TorchIO are a symptom of the maturation of medical AI research using deep learning techniques*.
 
@@ -110,62 +114,36 @@ extension that can be used to experiment with the
 
 ## Installation
 
-### Option 1: Extensions Manager
-
 The extension can be installed using
 [Extensions Manager](https://www.slicer.org/wiki/Documentation/4.10/SlicerApplication/ExtensionsManager).
-
-### Option 2: cloning this repository
-
-If you would like to apply changes to the module locally, you can clone this
-repository and add the path to the Slicer modules.
-
-#### Add module programmatically
-
-If this repo is in `~/git/SlicerTorchIO`, add this to `~/.slicerrc.py`:
-
-```python
-from pathlib import Path
-
-repoDir = Path('~/git/SlicerTorchIO/').expanduser()
-moduleDir = repoDir / 'TorchIOTransforms'
-modulePath = moduleDir / 'TorchIO.py'
-moduleFactory = slicer.app.moduleManager().factoryManager()
-moduleFactory.registerModule(qt.QFileInfo(str(modulePath)))
-moduleFactory.loadModules([modulePath.stem])
-```
-
-and open 3D Slicer. You can search the modules hitting `Ctrl + F` and typing
-`TorchIO`.
-
-#### In Slicer settings
-
-Add the module to the additional module paths, as explained in the
-[Slicer wiki](https://www.slicer.org/wiki/Documentation/4.10/SlicerApplication/ApplicationSettings#Additional_module_paths).
 
 ## Credits
 
 If you like this repository, please click on Star!
 
-If you use this tool for your research, please cite the paper:
+If you use this tool for your research, please cite our paper:
 
-> [Pérez-García, F., Sparks, R., Ourselin, S.: TorchIO: a Python library for efficient
-loading, preprocessing, augmentation and patch-based sampling of medical images
-in deep learning. arXiv:2003.04696 [cs, eess, stat] (Mar 2020), http://arxiv.org/abs/2003.04696, arXiv: 2003.04696](http://arxiv.org/abs/2003.04696)
+[F. Pérez-García, R. Sparks, and S. Ourselin. *TorchIO: a Python library for efficient loading, preprocessing, augmentation and patch-based sampling of medical images in deep learning*. Computer Methods and Programs in Biomedicine (June 2021), p. 106236. ISSN: 0169-2607.doi:10.1016/j.cmpb.2021.106236.](https://doi.org/10.1016/j.cmpb.2021.106236)
 
 BibTeX entry:
 
 ```bibtex
-@article{perez-garcia_torchio_2020,
-    title = {{TorchIO}: a {Python} library for efficient loading, preprocessing, augmentation and patch-based sampling of medical images in deep learning},
-    shorttitle = {{TorchIO}},
-    url = {http://arxiv.org/abs/2003.04696},
-    urldate = {2020-03-11},
-    journal = {arXiv:2003.04696 [cs, eess, stat]},
-    author = {P{\'e}rez-Garc{\'i}a, Fernando and Sparks, Rachel and Ourselin, Sebastien},
-    month = mar,
-    year = {2020},
-    note = {arXiv: 2003.04696},
-    keywords = {Computer Science - Computer Vision and Pattern Recognition, Electrical Engineering and Systems Science - Image and Video Processing, Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Statistics - Machine Learning},
+@article{perez-garcia_torchio_2021,
+    title = {TorchIO: a Python library for efficient loading, preprocessing, augmentation and patch-based sampling of medical images in deep learning},
+    journal = {Computer Methods and Programs in Biomedicine},
+    pages = {106236},
+    year = {2021},
+    issn = {0169-2607},
+    doi = {https://doi.org/10.1016/j.cmpb.2021.106236},
+    url = {https://www.sciencedirect.com/science/article/pii/S0169260721003102},
+    author = {P{\'e}rez-Garc{\'i}a, Fernando and Sparks, Rachel and Ourselin, S{\'e}bastien},
+    keywords = {Medical image computing, Deep learning, Data augmentation, Preprocessing},
 }
 ```
+
+This project is supported by the following institutions:
+
+- [Engineering and Physical Sciences Research Council (EPSRC) & UK Research and Innovation (UKRI)](https://epsrc.ukri.org/)
+- [EPSRC Centre for Doctoral Training in Intelligent, Integrated Imaging In Healthcare (i4health)](https://www.ucl.ac.uk/intelligent-imaging-healthcare/) (University College London)
+- [Wellcome / EPSRC Centre for Interventional and Surgical Sciences (WEISS)](https://www.ucl.ac.uk/interventional-surgical-sciences/) (University College London)
+- [School of Biomedical Engineering & Imaging Sciences (BMEIS)](https://www.kcl.ac.uk/bmeis) (King's College London)
