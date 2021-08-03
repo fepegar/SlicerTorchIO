@@ -421,21 +421,25 @@ class TorchIOTransformsTest(ScriptedLoadableModuleTest):
     self.test_TorchIOTransforms()
     self.tearDown()
 
+  def _delayDisplay(self, message):
+    if not slicer.app.testingEnabled():
+      self.delayDisplay(message)
+
   def test_TorchIOTransforms(self):
-    self.delayDisplay("Starting the test")
+    self._delayDisplay("Starting the test")
     import SampleData
     volumeNode = SampleData.downloadSample('MRHead')
-    self.delayDisplay('Finished with download and loading')
+    self._delayDisplay('Finished with download and loading')
     logic = TorchIOTransformsLogic()
     for transformName in TRANSFORMS:
       if transformName == 'HistogramStandardization':
         # This transform can't be run with default input parameters
         continue
-      self.delayDisplay(f'Applying {transformName}...')
+      self._delayDisplay(f'Applying {transformName}...')
       logic.applyTransform(
         volumeNode,
         volumeNode,
         transformName,
       )
-      self.delayDisplay(f'{transformName} passed!')
-    self.delayDisplay('Test passed!')
+      self._delayDisplay(f'{transformName} passed!')
+    self._delayDisplay('Test passed!')
