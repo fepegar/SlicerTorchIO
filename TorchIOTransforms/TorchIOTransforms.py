@@ -16,7 +16,7 @@ from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModuleTest,
 )
 
-TORCH_VERSION = '1.8.0'
+from TorchIOModule import TorchIOModuleLogic
 
 
 TRANSFORMS = list(sorted([
@@ -60,7 +60,7 @@ class TorchIOTransforms(ScriptedLoadableModule):
     )
 
   def getDefaultModuleDocumentationLink(self):
-    docsUrl = 'https://torchio.readthedocs.io/slicer.html'
+    docsUrl = 'https://torchio.readthedocs.io/interfaces/index.html#d-slicer-gui'
     linkText = f'See <a href="{docsUrl}">the documentation</a> for more information.'
     return linkText
 
@@ -70,7 +70,7 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
   def setup(self):
     ScriptedLoadableModuleWidget.setup(self)
     self.logic = TorchIOTransformsLogic()
-    if not self.logic.checkTorchIO():
+    if self.logic.torchio is None: # make sure PyTorch and TorchIO are installed
       return
     self.transforms = []
     self.currentTransform = None
@@ -200,14 +200,14 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
     try:
       kwargs = self.currentTransform.getKwargs()
       logging.info(f'Transform args: {kwargs}')
-      outputImage = self.currentTransform(inputVolumeNode, outputVolumeNode)
-    except Exception as e:
-      tb = traceback.format_exc()
-      message = (
-        f'TorchIO returned the error: {tb}'
-        f'\n\nTransform kwargs:\n{kwargs}'
+      self.currentTransform(inputVolumeNode, outputVolumeNode)
+    except:
+      message = 'Error applying the transform.'
+      detailedText = (
+        f'Transform kwargs:\n{kwargs}\n\n'
+        f'Error details:\n{traceback.format_exc()}'
       )
-      slicer.util.errorDisplay(message)
+      slicer.util.errorDisplay(message, detailedText=detailedText)
       return
     inputDisplayNode = inputVolumeNode.GetDisplayNode()
     inputColorNodeID = inputDisplayNode.GetColorNodeID()
@@ -222,135 +222,7 @@ class TorchIOTransformsWidget(ScriptedLoadableModuleWidget):
       slicer.util.setSliceViewerLayers(background=outputVolumeNode)
 
 
-class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
-
-  def pipInstallTorch(self, keepDialog=False, showDialog=True):
-    with self.showWaitCursor(show=showDialog):
-      slicer.util.pip_install(self.getTorchInstallLine())
-    if showDialog:
-      kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
-      slicer.util.delayDisplay('PyTorch was installed successfully', **kwargs)
-
-  def pipInstallTorchIO(self, keepDialog=False, showDialog=True):
-    with self.showWaitCursor(show=showDialog):
-      self.checkLinuxPreviewError('pillow')
-      self.checkLinuxPreviewError('scipy')
-      self.installRequirements()
-      with self.peakPythonConsole(show=showDialog):
-        slicer.util.pip_install(self.getTorchIOInstallLine(dependencies=False))
-    if showDialog:
-      kwargs = dict(autoCloseMsec=-1) if keepDialog else {}
-      slicer.util.delayDisplay('TorchIO was installed successfully', **kwargs)
-
-  def installRequirements(self):
-    slicer.util.pip_install('humanize nibabel tqdm')
-
-  def isMac(self):
-    return platform.system() == 'Darwin'
-
-  def getTorchInstallLine(self):
-    if self.isMac():
-      args = ('torch',)
-    else:
-      args = (
-        f'torch=={TORCH_VERSION}+cpu',
-        '-f', 'https://download.pytorch.org/whl/torch_stable.html',
-      )
-    return ' '.join(args)
-
-  def getTorchIOInstallLine(self, dependencies=True):
-    major = slicer.app.majorVersion
-    if major < 4:
-      slicer.util.errorDisplay('This Slicer is too old. Please use Slicer 4.X')
-      return
-    deps = '' if dependencies else ' --no-dependencies'
-    return 'torchio' + deps
-
-  def checkLinuxPreviewError(self, package):
-    # https://discourse.slicer.org/t/slicer-4-11-20200930-cant-import-pip-installed-pillow-on-linux/14448/5
-    import platform
-    if platform.system() != 'Linux':
-      return
-    try:
-      if package == 'pillow':
-        from PIL import Image
-      elif package == 'scipy':
-        from scipy import special
-    except ImportError:
-      print(f'Installing {package}...')
-      slicer.util.pip_install(f'--upgrade {package} --force-reinstall')
-
-  def checkTorchIO(self):
-    try:
-      import torchio
-      # torchio is imported as "namespace" if the parent path of the repository
-      # is in Slicer's sys.path (I think)
-      version = torchio.__version__
-    except (ImportError, AttributeError):
-      message = (
-        'This module requires the "torchio" Python package.'
-        ' Click OK to download it now. It may take a few minutes.'
-      )
-      installTorchIO = slicer.util.confirmOkCancelDisplay(message)
-      if installTorchIO:
-        try:  # if torch is already installed
-          import torch
-          with self.peakPythonConsole():
-            self.pipInstallTorchIO()
-        except ImportError:
-          qt.QApplication.restoreOverrideCursor()
-          packages = '\n'.join(self.getTorchInstallLine().split())
-          message = (
-            'The following packages will be installed first:\n\n'
-            f'{packages}'
-            '\n\nIf you would like to install a different version, then click Cancel'
-            ' and install your preferred version before using this module'
-          )
-          installTorch = slicer.util.confirmOkCancelDisplay(message)
-          if installTorch:
-            with self.peakPythonConsole():
-              self.pipInstallTorch()
-              self.pipInstallTorchIO()
-          else:
-            return
-        finally:
-          qt.QApplication.restoreOverrideCursor()
-      import torchio
-    try:
-      logging.info(f'TorchIO version: {torchio.__version__}')
-    except AttributeError:
-      message = (
-        'TorchIO will be available after restarting Slicer.'
-        ' Do you want to restart now?'
-      )
-      restart = slicer.util.confirmOkCancelDisplay(message)
-      if restart:
-        slicer.util.restart()
-      else:
-        return False
-    return True
-
-  def getPythonConsoleWidget(self):
-    return slicer.util.mainWindow().pythonConsole().parent()
-
-  @contextmanager
-  def peakPythonConsole(self, show=True):
-    if show:
-      console = self.getPythonConsoleWidget()
-      pythonVisible = console.visible
-      console.setVisible(True)
-    yield
-    if show:
-      console.setVisible(pythonVisible)
-
-  @contextmanager
-  def showWaitCursor(self, show=True):
-    if show:
-      qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-    yield
-    if show:
-      qt.QApplication.restoreOverrideCursor()
-
+class TorchIOTransformsLogic(TorchIOModuleLogic):
   def getTransform(self, transformName):
     import TorchIOTransformsLib
     return getattr(TorchIOTransformsLib, transformName)()
@@ -361,35 +233,6 @@ class TorchIOTransformsLogic(ScriptedLoadableModuleLogic):
     transform = self.getTransform(transformName)
     with self.showWaitCursor():
       transform(inputNode, outputNode)
-
-  def getNodesFromSubject(self, subject):
-    nodes = {}
-    for name, image in subject.get_images_dict(intensity_only=False).items():
-      nodes[name] = self.getNodeFromImage(image, name=name)
-    return nodes
-
-  def getNodeFromImage(self, image, name=None):
-    import torchio
-    if image.type == torchio.LABEL:
-      className = 'vtkMRMLLabelMapVolumeNode'
-    else:
-      className = 'vtkMRMLScalarVolumeNode'
-    return su.PushVolumeToSlicer(image.as_sitk(), name=name, className=className)
-
-  def getColin(self, version=1998):
-    import torchio
-    colin = torchio.datasets.Colin27(version=version)
-    nodes = self.getNodesFromSubject(colin)
-    if version == 1998:
-      slicer.util.setSliceViewerLayers(
-        background=nodes['t1'],
-        label=nodes['brain'],
-      )
-    elif version == 2008:
-      slicer.util.setSliceViewerLayers(
-        background=nodes['t1'],
-        foreground=nodes['t2'],
-      )
 
 
 class TorchIOTransformsTest(ScriptedLoadableModuleTest):
