@@ -120,6 +120,8 @@ class TorchIOModuleLogic(ScriptedLoadableModuleLogic):
 
   @contextmanager
   def peakPythonConsole(self, show=True):
+    if slicer.app.testingEnabled():
+      show = False
     if show:
       console = self.getPythonConsoleWidget()
       pythonVisible = console.visible
