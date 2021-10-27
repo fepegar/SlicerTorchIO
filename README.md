@@ -1,8 +1,10 @@
+<!-- markdownlint-disable -->
 <p align="center">
   <a href="http://torchio.rtfd.io/">
     <img src="https://raw.githubusercontent.com/fepegar/torchio/master/docs/source/favicon_io/for_readme_2000x462.png" alt="TorchIO logo">
   </a>
 </p>
+<!-- markdownlint-restore -->
 
 > *Tools like TorchIO are a symptom of the maturation of medical AI research using deep learning techniques*.
 
@@ -15,6 +17,7 @@ This repository contains the code for a [3D Slicer](https://www.slicer.org/)
 extension that can be used to experiment with the
 [TorchIO](https://torchio.readthedocs.io/) Python package without any coding.
 
+<!-- markdownlint-disable -->
 <table align="center">
     <tr>
         <td align="center">Original</td>
@@ -111,11 +114,16 @@ extension that can be used to experiment with the
         </td>
     </tr>
 </table>
+<!-- markdownlint-restore -->
 
 ## Installation
 
 The extension can be installed using
 [Extensions Manager](https://www.slicer.org/wiki/Documentation/4.10/SlicerApplication/ExtensionsManager).
+
+## Continuous integration
+
+The build status can be checked on [CDash](https://slicer.cdash.org/index.php?project=SlicerPreview&filtercount=1&showfilters=1&field1=buildname&compare1=63&value1=torchio).
 
 ## Credits
 
@@ -144,5 +152,5 @@ This project is supported by the following institutions:
 
 - [Engineering and Physical Sciences Research Council (EPSRC) & UK Research and Innovation (UKRI)](https://epsrc.ukri.org/)
 - [EPSRC Centre for Doctoral Training in Intelligent, Integrated Imaging In Healthcare (i4health)](https://www.ucl.ac.uk/intelligent-imaging-healthcare/) (University College London)
-- [Wellcome / EPSRC Centre for Interventional and Surgical Sciences (WEISS)](https://www.ucl.ac.uk/interventional-surgical-sciences/) (University College London)
-- [School of Biomedical Engineering & Imaging Sciences (BMEIS)](https://www.kcl.ac.uk/bmeis) (King's College London)
+- [Wellcome / EPSRC Centre for Interventional and Surgical Sciences (WEISS), University College London (UCL)](https://www.ucl.ac.uk/interventional-surgical-sciences/) (University College London)
+- [School of Biomedical Engineering & Imaging Sciences (BMEIS), King's College London](https://www.kcl.ac.uk/bmeis) (King's College London)
