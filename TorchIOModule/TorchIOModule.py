@@ -82,7 +82,7 @@ class TorchIOModuleLogic(ScriptedLoadableModuleLogic):
 
   @staticmethod
   def installTorchIO(confirm=True):
-    if confirm:
+    if confirm and not slicer.app.commandOptions().testingEnabled:
       install = slicer.util.confirmOkCancelDisplay(
         'TorchIO will be downloaded and installed now. The process might take some minutes.'
       )
