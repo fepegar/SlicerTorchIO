@@ -17,6 +17,10 @@ This repository contains the code for a [3D Slicer](https://www.slicer.org/)
 extension that can be used to experiment with the
 [TorchIO](https://torchio.readthedocs.io/) Python package without any coding.
 
+More information on the extension can be found on the [TorchIO documentation](https://torchio.readthedocs.io/interfaces/index.html#d-slicer-gui).
+
+Please use the **Preview Release** of 3D Slicer.
+
 <!-- markdownlint-disable -->
 <table align="center">
     <tr>
