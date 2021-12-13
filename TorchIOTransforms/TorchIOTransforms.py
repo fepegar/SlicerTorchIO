@@ -16,21 +16,11 @@ from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModuleTest,
 )
 
+import TorchIOTransformsLib
 from TorchIOModule import TorchIOModuleLogic
 
 
-TRANSFORMS = list(sorted([
-  'RandomBlur',
-  'RandomSpike',
-  'RandomAffine',
-  'RandomGamma',
-  'RandomMotion',
-  'RandomGhosting',
-  'RandomBiasField',
-  'RandomAnisotropy',
-  'RandomElasticDeformation',
-  'HistogramStandardization',
-]))
+TRANSFORMS = list(sorted(c.__name__ for c in TorchIOTransformsLib.__all__))
 
 
 class TorchIOTransforms(ScriptedLoadableModule):
