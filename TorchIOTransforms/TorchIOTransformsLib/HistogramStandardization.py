@@ -1,8 +1,6 @@
 import qt
-import slicer
 
 from .Transform import Transform
-from .CoordinatesWidget import CoordinatesWidget
 
 
 class HistogramStandardization(Transform):

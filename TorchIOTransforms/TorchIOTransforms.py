@@ -1,18 +1,16 @@
 import logging
-import platform
 import traceback
 from pathlib import Path
 from contextlib import contextmanager
 
 import numpy as np
-import SimpleITK as sitk
 
-import vtk, qt, ctk, slicer
-import sitkUtils as su
+import qt
+import ctk
+import slicer
 from slicer.ScriptedLoadableModule import (
   ScriptedLoadableModule,
   ScriptedLoadableModuleWidget,
-  ScriptedLoadableModuleLogic,
   ScriptedLoadableModuleTest,
 )
 
@@ -20,7 +18,7 @@ import TorchIOTransformsLib
 from TorchIOModule import TorchIOModuleLogic
 
 
-TRANSFORMS = list(sorted(c.__name__ for c in TorchIOTransformsLib.__all__))
+TRANSFORMS = list(sorted(transformName for transformName in TorchIOTransformsLib.__all__))
 
 
 class TorchIOTransforms(ScriptedLoadableModule):

@@ -1,7 +1,6 @@
 import qt
 
 from .Transform import Transform
-from .CoordinatesWidget import CoordinatesWidget
 
 
 class RandomMotion(Transform):

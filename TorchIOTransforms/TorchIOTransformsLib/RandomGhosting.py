@@ -3,7 +3,6 @@ import slicer
 import numpy as np
 
 from .Transform import Transform
-from .CoordinatesWidget import CoordinatesWidget
 
 
 class RandomGhosting(Transform):

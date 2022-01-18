@@ -3,13 +3,8 @@ import inspect
 import importlib
 
 import qt
-import ctk
 import slicer
-import numpy as np
 import sitkUtils as su
-
-import torch
-import torchio
 
 
 class Transform:
@@ -21,7 +16,7 @@ class Transform:
     def getHelpLink(self):
         docs = 'https://torchio.readthedocs.io'
         type_ = self.transformType
-        return f'{docs}/transforms/{self.transformType}.html#torchio.transforms.{self.name}'
+        return f'{docs}/transforms/{type_}.html#torchio.transforms.{self.name}'
 
     def setup(self):
         raise NotImplementedError
@@ -115,6 +110,7 @@ class Transform:
         return slider.minimumValue, slider.maximumValue
 
     def __call__(self, inputVolumeNode, outputVolumeNode):
+        import torchio
         image = su.PullVolumeFromSlicer(inputVolumeNode)
         tensor, affine = torchio.io.sitk_to_nib(image)
         if inputVolumeNode.IsA('vtkMRMLScalarVolumeNode'):
